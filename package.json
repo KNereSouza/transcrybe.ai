@@ -1,0 +1,24 @@
+{
+  "name": "transcrybe.ai",
+  "version": "1.0.0",
+  "description": "API REST construída com Node.js para orquestrar a transcrição e sumarização de vídeos do YouTube via IA.",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch ."
+  },
+  "keywords": [
+    "ai",
+    "videos",
+    "transcribe",
+    "youtube",
+    "summarize"
+  ],
+  "author": "KNereSouza",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}

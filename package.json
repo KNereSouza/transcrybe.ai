@@ -16,7 +16,7 @@
     "summarize"
   ],
   "author": "KNereSouza",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@distube/ytdl-core": "^4.16.12",
     "cors": "^2.8.5",

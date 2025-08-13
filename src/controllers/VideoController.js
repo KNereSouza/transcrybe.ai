@@ -1,13 +1,13 @@
 import VideoService from "../services/VideoService.js";
 
 export default class VideoController {
-  constructor(videoService = new VideoService()) {
-    this.videoService = videoService;
+  constructor(client, videoService) {
+    this.videoService = videoService || new VideoService(client);
   }
 
   async handle(req, res) {
-    const url = req.query.url;
-    const summarize = req.query.summarize === "true";
+    const { url, summarize } = req.query;
+    const shouldSummarize = summarize === "true";
 
     if (!url) {
       return res.status(400).json({
@@ -17,18 +17,16 @@ export default class VideoController {
     }
 
     try {
-      const data = await this.videoService.process(url, summarize);
+      const data = await this.videoService.process(url, shouldSummarize);
 
       return res.status(200).json({
         success: true,
-        message: summarize
+        message: shouldSummarize
           ? "Vídeo processado e resumido com sucesso."
           : "Vídeo processado com sucesso.",
         data,
       });
     } catch (error) {
-      console.error("Erro no VideoController:", error);
-
       return res.status(500).json({
         success: false,
         message: "Erro interno no servidor ao processar o vídeo.",

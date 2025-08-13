@@ -6,26 +6,20 @@ export default class VideoService {
     this.clientEntity = clientEntity;
   }
 
-  async process(url, summarize = false) {
+  async process(url, shouldSummarize = false) {
     try {
       const buffer = await getAudioBuffer(url);
-
       const transcription = await this.clientEntity.transcribe(buffer);
 
-      const data = {
-        transcription,
-      };
+      const result = { transcription };
 
-      if (summarize) {
-        const summary = await this.clientEntity.summarize(transcription);
-
-        data.summary = summary;
+      if (shouldSummarize) {
+        result.summary = await this.clientEntity.summarize(transcription);
       }
 
-      return data;
+      return result;
     } catch (error) {
-      console.error("Erro no VideoService:", error);
-      throw new Error("Falha ao processar o vídeo.");
+      throw new Error(`Falha ao processar o vídeo: ${error.message}`);
     }
   }
 }

@@ -1,11 +1,6 @@
 import { Router } from "express";
 import VideoController from "../controllers/VideoController.js";
-import { GeminiClient, OpenAiClient } from "../config/clients.js";
-
-const clients = {
-  gemini: GeminiClient,
-  openai: OpenAiClient,
-};
+import { clients } from "../config/clients.js";
 
 const routes = Router();
 

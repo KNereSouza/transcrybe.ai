@@ -1,8 +1,8 @@
 import { getAudioBuffer } from "../utils/getAudioBuffer.js";
-import { OpenAiClient } from "../config/clients.js";
+import { clients } from "../config/clients.js";
 
 export default class VideoService {
-  constructor(clientEntity = new OpenAiClient()) {
+  constructor(clientEntity = new clients.openai()) {
     this.clientEntity = clientEntity;
   }
 

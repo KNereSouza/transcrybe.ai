@@ -6,25 +6,27 @@ import {
 } from "@google/genai";
 
 import { env } from "./env.js";
-
-import { saveBufferToTempFile, removeTempFile } from "../utils/tempFile.js";
-import { SUMMARY_PROMPT } from "./summaryPrompt.js";
 import fs from "fs";
+import { saveBufferToTempFile, removeTempFile } from "../utils/tempFile.js";
+import { TRANSCRIBE_PROMPT, SUMMARY_PROMPT } from "./prompts.js";
 
-export class OpenAiClient {
+class OpenAiClient {
   constructor(client = new OpenAI({ apiKey: env.OPENAI_API_KEY })) {
-    console.log("OpenAI Client");
     this.client = client;
   }
 
   async transcribe(buffer) {
     const tempFilePath = saveBufferToTempFile(buffer);
+
     try {
       const response = await this.client.audio.transcriptions.create({
-        file: fs.createReadStream(tempFilePath),
         model: "whisper-1",
+        file: fs.createReadStream(tempFilePath),
+        prompt: TRANSCRIBE_PROMPT,
       });
       return response.text;
+    } catch (e) {
+      console.error("[OpenAI] Erro na transcrição:", e);
     } finally {
       removeTempFile(tempFilePath);
     }
@@ -32,37 +34,44 @@ export class OpenAiClient {
 
   async summarize(transcription) {
     const prompt = `${SUMMARY_PROMPT}${transcription}`;
-    const response = await this.client.responses.create({
-      model: "gpt-5",
-      input: prompt,
-    });
-    return response.output_text;
+
+    try {
+      const response = await this.client.responses.create({
+        model: "gpt-5",
+        input: prompt,
+      });
+      return response.output_text;
+    } catch (e) {
+      console.error("[OpenAI] Erro no resumo:", e);
+    }
   }
 }
 
-export class GeminiClient {
+class GeminiClient {
   constructor(client = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY })) {
-    console.log("Google Gemini Client");
     this.client = client;
   }
 
   async transcribe(buffer) {
     const tempFilePath = saveBufferToTempFile(buffer);
+
     try {
       const audio = await this.client.files.upload({
         file: tempFilePath,
-        config: { mimeType: "audio/wav" },
+        config: { mimeType: "audio/mpeg" },
       });
 
       const response = await this.client.models.generateContent({
         model: "gemini-2.5-flash",
         contents: createUserContent([
           createPartFromUri(audio.uri, audio.mimeType),
-          "Transcreva este áudio.",
+          TRANSCRIBE_PROMPT,
         ]),
       });
 
       return response.text;
+    } catch (e) {
+      console.error("[Gemini] Erro na transcrição:", e);
     } finally {
       removeTempFile(tempFilePath);
     }
@@ -71,11 +80,19 @@ export class GeminiClient {
   async summarize(transcription) {
     const prompt = `${SUMMARY_PROMPT}${transcription}`;
 
-    const response = await this.client.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-
-    return response.text;
+    try {
+      const response = await this.client.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+      return response.text;
+    } catch (e) {
+      console.error("[Gemini] Erro no resumo:", e);
+    }
   }
 }
+
+export const clients = {
+  gemini: GeminiClient,
+  openai: OpenAiClient,
+};

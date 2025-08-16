@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 
-export function saveBufferToTempFile(buffer, filename = "audio.wav") {
+export function saveBufferToTempFile(buffer, filename = "audio.mp3") {
   const tempFilePath = path.join(os.tmpdir(), filename);
   fs.writeFileSync(tempFilePath, buffer);
   return tempFilePath;
